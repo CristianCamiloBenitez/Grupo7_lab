@@ -1,0 +1,81 @@
+-- SQL Server Management Studio Forward Engineering
+
+-- Disable foreign key checks and unique checks temporarily (SQL Server doesn't support these commands)
+EXEC sp_MSforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL';
+
+-- -----------------------------------------------------
+-- Database arq_per_db
+-- -----------------------------------------------------
+
+USE master;
+GO
+
+IF DB_ID('arq_per_db') IS NOT NULL
+BEGIN
+    ALTER DATABASE arq_per_db SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE arq_per_db;
+END
+
+-- Create the arq_per_db database
+CREATE DATABASE arq_per_db;
+GO
+
+USE arq_per_db;
+GO
+
+-- -----------------------------------------------------
+-- Table arq_per_db.dbo.persona
+-- -----------------------------------------------------
+CREATE TABLE persona (
+  cc INT NOT NULL,
+  nombre VARCHAR(45) NOT NULL,
+  apellido VARCHAR(45) NOT NULL,
+  genero CHAR(1) NOT NULL,
+  edad INT NULL,
+  PRIMARY KEY (cc)
+);
+
+-- -----------------------------------------------------
+-- Table arq_per_db.dbo.profesion
+-- -----------------------------------------------------
+CREATE TABLE profesion (
+  id INT NOT NULL,
+  nom VARCHAR(90) NOT NULL,
+  des TEXT NULL,
+  PRIMARY KEY (id)
+);
+
+-- -----------------------------------------------------
+-- Table arq_per_db.dbo.estudios
+-- -----------------------------------------------------
+CREATE TABLE estudios (
+  id_prof INT NOT NULL,
+  cc_per INT NOT NULL,
+  fecha DATE NULL,
+  univer VARCHAR(50) NULL,
+  PRIMARY KEY (id_prof, cc_per)
+);
+
+-- Create foreign key constraints for SQL Server
+ALTER TABLE estudios
+ADD CONSTRAINT estudio_persona_fk FOREIGN KEY (cc_per) REFERENCES persona (cc);
+
+ALTER TABLE estudios
+ADD CONSTRAINT estudio_profesion_fk FOREIGN KEY (id_prof) REFERENCES profesion (id);
+
+-- -----------------------------------------------------
+-- Table arq_per_db.dbo.telefono
+-- -----------------------------------------------------
+CREATE TABLE telefono (
+  num VARCHAR(15) NOT NULL,
+  oper VARCHAR(45) NOT NULL,
+  duenio INT NOT NULL,
+  PRIMARY KEY (num)
+);
+
+-- Create foreign key constraints for SQL Server
+ALTER TABLE telefono
+ADD CONSTRAINT telefono_persona_fk FOREIGN KEY (duenio) REFERENCES persona (cc);
+
+-- Re-enable foreign key checks
+EXEC sp_MSforeachtable 'ALTER TABLE ? CHECK CONSTRAINT ALL';
